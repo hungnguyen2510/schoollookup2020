@@ -61,8 +61,8 @@ export default {
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'Managers',
-          to: '/inspire'
+          title: 'Management',
+          to: '/management'
         },
         {
           icon: 'mdi-login',
