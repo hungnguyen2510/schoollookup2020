@@ -10,11 +10,10 @@
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
 
-        <v-list-group :value="true" prepend-icon="mdi-account-circle">
+        <v-list-group prepend-icon="mdi-account-circle">
           <template v-slot:activator>
             <v-list-item-title>Danh Sách</v-list-item-title>
           </template>
-
           <v-list-item
             v-for="(item, i) in admins"
             :key="i"
@@ -57,7 +56,7 @@ export default {
         title: "DS Trường",
         to: "/ds-truong"
       },
-      { icon: "mdi-apps", title: "DS Ngành", to: "/test02" }
+      { icon: "mdi-apps", title: "DS Ngành", to: "/ds-nganh" }
     ]
   })
 };
