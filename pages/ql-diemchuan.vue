@@ -21,7 +21,7 @@
         item-value="matruong"
         :menu-props="{ maxHeight: '300' }"
         outlined
-        @input="GetThongTinDiemChuanNganh"
+        @input="GetNamHoc"
       ></v-select>
     </v-col>
     <v-col cols="4">
@@ -33,10 +33,12 @@
         item-value="idNamHoc"
         :menu-props="{ maxHeight: '300' }"
         outlined
+        @input="GetThongTinDiemChuanNganh"
       ></v-select>
     </v-col>
+
     <v-col cols="12">
-      <!-- <v-data-table
+      <v-data-table
         :headers="headers"
         :items="dsNganh"
         sort-by="matruong"
@@ -44,7 +46,21 @@
         :loading="!unloading"
         loading-text="Loading... Please wait"
       >
-      </v-data-table> -->
+        <template v-slot:top>
+          <v-toolbar flat>
+            <v-col cols="12" sm="4" md="2">
+              <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
+            </v-col>
+            <v-divider class="mx-4" inset vertical></v-divider>
+            <v-spacer></v-spacer>
+          </v-toolbar>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-icon class="mr-2" color="green">
+            mdi-information
+          </v-icon>
+        </template>
+      </v-data-table>
     </v-col>
   </v-row>
 </template>
@@ -60,13 +76,29 @@ export default {
     dsNamHoc: [],
     dsKhuVuc: [],
     dsTruong: [],
-    // headers: [
-    //   {
-    //     text: "Mã Trường",
-    //     align: "start",
-    //     value: "matruong"
-    //   }
-    // ]
+    headers: [
+      {
+        text: "Mã Ngành",
+        align: "start",
+        value: "manganh"
+      },
+      {
+        text: "Mã Nhóm Ngành",
+        value: "manhomnganh"
+      },
+      {
+        text: "Tên Ngành",
+        value: "tennganh"
+      },
+      {
+        text: "Điểm Chuẩn",
+        value: "diemchuan"
+      },
+      {
+        text: "Actions",
+        value: "actions"
+      }
+    ]
   }),
   async created() {
     this.checkSignIn();
@@ -99,6 +131,7 @@ export default {
     },
     GetTruongByKhuVucID(makhuvuc) {
       this.dsTruong = [];
+      this.dsNamHoc = [];
       if (makhuvuc != 0) {
         this.$fire.firestore
           .collection("truong")
@@ -125,8 +158,10 @@ export default {
       }
     },
     GetNamHoc() {
+      this.dsNamHoc = [];
       this.$fire.firestore
         .collection("namhoc")
+        .orderBy("idNamHoc", "desc")
         .get()
         .then(querySnapshot => {
           // Immutable copy
@@ -136,32 +171,43 @@ export default {
           });
         });
     },
-    GetThongTinDiemChuanNganh(matruong) {
-      this.GetNamHoc();
+    GetThongTinDiemChuanNganh() {
+      this.dsNganh = [];
+      this.unloading = false;
+      let arrtmp = [];
+      const arr1 = [];
       this.$fire.firestore
         .collection("truong")
-        .where("matruong", "==", matruong)
+        .where("matruong", "==", this.selectedTruong)
         .get()
         .then(querySnapshot => {
           // Immutable copy
           querySnapshot.forEach(doc => {
-            // this.dsNamHoc = [...this.dsNamHoc, { id: doc.id, ...doc.data() }];
-            console.log(doc.data().manganh);
-            this.$fire.firestore
-              .collection("nganh")
-              .where("manganh", "in", doc.data().manganh)
-              .get()
-              .then(querySnapshot => {
-                // Immutable copy
-                querySnapshot.forEach(doc => {
-                  this.dsNganh = [
-                    ...this.dsNganh,
-                    { id: doc.id, ...doc.data() }
-                  ];
-                  console.log(doc.data());
-                  this.unloading = true;
+            // console.log(doc.data().manganh);
+            arrtmp = doc.data().manganh;
+            // arrtmp = doc.data().manganh.splice(10,doc.data().manganh.length);
+            // console.log(arrtmp);
+            while (arrtmp.length) {
+              // console.log(arrtmp.splice(0, 10));
+              const tmp = arrtmp.splice(0, 10);
+              this.$fire.firestore
+                .collection("nganh")
+                .where("manganh", "in", tmp)
+                .get()
+                .then(querySnapshot => {
+                  // Immutable copy
+                  // console.log(querySnapshot.size,tmp.length)
+                  querySnapshot.forEach(doc => {
+                    this.dsNganh = [
+                      ...this.dsNganh,
+                      { id: doc.id, ...doc.data() }
+                    ];
+
+                    this.unloading = true;
+                  });
                 });
-              });
+            }
+            console.log(this.dsNganh);
           });
         });
     }
