@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :items="dsTruong"
-      sort-by="calories"
+      sort-by="matruong"
       class="elevation-1"
       :loading="!unloading"
       loading-text="Loading... Please wait"
@@ -19,8 +19,8 @@
             <v-select
               v-model="selectedKhuVuc"
               :items="dsKhuVuc"
-              item-text="tenKhuVuc"
-              item-value="maKhuVuc"
+              item-text="tenkhuvuc"
+              item-value="makhuvuc"
               label="Chọn Khu Vực"
               dense
               outlined
@@ -31,7 +31,7 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="inforTruong(item)">
+        <v-icon class="mr-2" @click="inforTruong(item)" color="green">
           mdi-information
         </v-icon>
       </template>
@@ -93,24 +93,7 @@ export default {
     selectedKhuVuc: null,
     itemTruong: [],
     dsTruong: [],
-    dsKhuVuc: [
-      {
-        maKhuVuc: 0,
-        tenKhuVuc: "Tất Cả"
-      },
-      {
-        maKhuVuc: 1,
-        tenKhuVuc: "Khu Vực Miền Bắc"
-      },
-      {
-        maKhuVuc: 2,
-        tenKhuVuc: "Khu Vực Miền Trung"
-      },
-      {
-        maKhuVuc: 3,
-        tenKhuVuc: "Khu Vực Miền Nam"
-      }
-    ],
+    dsKhuVuc: [],
     unloading: false,
     headers: [
       {
@@ -135,6 +118,7 @@ export default {
   }),
   async created() {
     this.checkSignIn();
+    this.GetKhuVuc();
     this.readFromFirestore();
   },
   beforeDestroy() {
@@ -163,6 +147,18 @@ export default {
           console.log(this.dsTruong);
         });
     },
+    GetKhuVuc() {
+      this.$fire.firestore
+        .collection("khuVuc")
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          querySnapshot.forEach(doc => {
+            this.dsKhuVuc = [...this.dsKhuVuc, { id: doc.id, ...doc.data() }];
+            console.log(this.dsKhuVuc);
+          });
+        });
+    },
     inforTruong({ id, matruong }) {
       this.dialog = true;
       this.itemTruong = [];
@@ -183,24 +179,36 @@ export default {
           // console.log(this.dsTruong);
         });
     },
-    FilterKhuVuc(maKhuVuc){
+    FilterKhuVuc(maKhuVuc) {
       this.dsTruong = [];
-      this.$fire.firestore
-        .collection("truong")
-        .where("makhuvuc", "==", maKhuVuc)
-        .get()
-        .then(querySnapshot => {
-          // Immutable copy
-          querySnapshot.forEach(doc => {
-            this.dsTruong = [
-              ...this.dsTruong,
-              { id: doc.id, ...doc.data() }
-            ];
-            console.log(doc.data());
+      if (maKhuVuc == 0) {
+        this.$fire.firestore
+          .collection("truong")
+          .get()
+          .then(querySnapshot => {
+            // Immutable copy
+            querySnapshot.forEach(doc => {
+              this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
+              // console.log(doc.data());
+            });
+            this.unloading = true;
+            // console.log(this.dsTruong);
           });
-          this.unloading = true;
-          // console.log(this.dsTruong);
-        });
+      } else {
+        this.$fire.firestore
+          .collection("truong")
+          .where("makhuvuc", "==", maKhuVuc)
+          .get()
+          .then(querySnapshot => {
+            // Immutable copy
+            querySnapshot.forEach(doc => {
+              this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
+              // console.log(doc.data());
+            });
+            this.unloading = true;
+            // console.log(this.dsTruong);
+          });
+      }
     }
   }
 };

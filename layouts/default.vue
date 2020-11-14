@@ -10,12 +10,12 @@
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
 
-        <v-list-group prepend-icon="mdi-account-circle">
+        <v-list-group no-action prepend-icon="mdi-account-circle">
           <template v-slot:activator>
             <v-list-item-title>Danh Sách</v-list-item-title>
           </template>
           <v-list-item
-            v-for="(item, i) in admins"
+            v-for="(item, i) in danhsach"
             :key="i"
             :to="item.to"
             router
@@ -27,6 +27,20 @@
             <v-list-item-content>
               <v-list-item-title v-text="item.title" />
             </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
+        <v-list-group no-action prepend-icon="mdi-account-circle">
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title>Actions</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-list-item v-for="(item, i) in admins" :key="i" :to="item.to">
+            <v-list-item-icon>
+              <v-icon v-text="item.icon"></v-icon>
+            </v-list-item-icon>
+            <v-list-item-title v-text="item.title"></v-list-item-title>
           </v-list-item>
         </v-list-group>
       </v-list>
@@ -50,11 +64,19 @@ export default {
     drawer: false,
     fixed: false,
     title: "School Lookup",
-    admins: [
+    danhsach: [
       {
         icon: "mdi-apps",
         title: "DS Trường",
         to: "/ds-truong"
+      },
+      { icon: "mdi-apps", title: "DS Ngành", to: "/ds-nganh" }
+    ],
+    admins: [
+      {
+        icon: "mdi-apps",
+        title: "Điểm Chuẩn",
+        to: "/ql-diemchuan"
       },
       { icon: "mdi-apps", title: "DS Ngành", to: "/ds-nganh" }
     ]
