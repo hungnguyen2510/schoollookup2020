@@ -1,73 +1,145 @@
 <template>
-  <v-row>
-    <v-col cols="4">
-      <v-select
-        :items="dsKhuVuc"
-        v-model="selectedKhuVuc"
-        label="Chọn Khu Vực"
-        item-text="tenkhuvuc"
-        item-value="makhuvuc"
-        :menu-props="{ maxHeight: '300' }"
-        outlined
-        @input="GetTruongByKhuVucID"
-      ></v-select>
-    </v-col>
-    <v-col cols="4">
-      <v-select
-        :items="dsTruong"
-        v-model="selectedTruong"
-        label="Chọn Trường"
-        item-text="tentruong"
-        item-value="matruong"
-        :menu-props="{ maxHeight: '300' }"
-        outlined
-        @input="GetNamHoc"
-      ></v-select>
-    </v-col>
-    <v-col cols="4">
-      <v-select
-        :items="dsNamHoc"
-        v-model="selectedNamHoc"
-        label="Chọn Năm Học"
-        item-text="sNamHoc"
-        item-value="idNamHoc"
-        :menu-props="{ maxHeight: '300' }"
-        outlined
-        @input="GetThongTinDiemChuanNganh"
-      ></v-select>
-    </v-col>
+  <v-container>
+    <v-row>
+      <v-col cols="4">
+        <v-select
+          :items="dsKhuVuc"
+          v-model="selectedKhuVuc"
+          label="Chọn Khu Vực"
+          item-text="tenkhuvuc"
+          item-value="makhuvuc"
+          :menu-props="{ maxHeight: '300' }"
+          outlined
+          @input="GetTruongByKhuVucID"
+        ></v-select>
+      </v-col>
+      <v-col cols="4">
+        <v-select
+          :items="dsTruong"
+          v-model="selectedTruong"
+          label="Chọn Trường"
+          item-text="tentruong"
+          item-value="matruong"
+          :menu-props="{ maxHeight: '300' }"
+          outlined
+          @input="GetNamHoc"
+        ></v-select>
+      </v-col>
+      <v-col cols="4">
+        <v-select
+          :items="dsNamHoc"
+          v-model="selectedNamHoc"
+          label="Chọn Năm Học"
+          item-text="sNamHoc"
+          item-value="idNamHoc"
+          :menu-props="{ maxHeight: '300' }"
+          outlined
+          @input="GetThongTinDiemChuanNganh"
+        ></v-select>
+      </v-col>
 
-    <v-col cols="12">
-      <v-data-table
-        :headers="headers"
-        :items="dsNganh"
-        sort-by="matruong"
-        class="elevation-1"
-        :loading="unloading"
-        loading-text="Loading... Please wait"
-      >
-        <template v-slot:top>
-          <v-toolbar flat>
-            <v-col cols="12" sm="4" md="2">
-              <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
-            </v-col>
-            <v-divider class="mx-4" inset vertical></v-divider>
-            <v-spacer></v-spacer>
-          </v-toolbar>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-icon class="mr-2" color="green" @click="UpdateDiemCuan()">
-            mdi-information
-          </v-icon>
-        </template>
-      </v-data-table>
-    </v-col>
-  </v-row>
+      <v-col cols="12">
+        <v-data-table
+          :headers="headers"
+          :items="dsNganh"
+          sort-by="matruong"
+          class="elevation-1"
+          :loading="unloading"
+          loading-text="Loading... Please wait"
+        >
+          <template v-slot:top>
+            <v-toolbar flat>
+              <v-col cols="12" sm="4" md="2">
+                <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
+              </v-col>
+              <v-divider class="mx-4" inset vertical></v-divider>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+          </template>
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon class="mr-2" color="green" @click="UpdateDiemChuan(item)">
+              mdi-information
+            </v-icon>
+          </template>
+        </v-data-table>
+      </v-col>
+    </v-row>
+    <v-dialog v-model="dialogInsert" max-width="700px" persistent>
+      <v-card>
+        <v-card-title>
+          <span class="headline">Thêm môn học</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+              <v-text-field
+                v-model="selectedNamHoc"
+                label="Năm Học"
+                outlined
+                disabled
+              ></v-text-field>
+              <v-row>
+                <v-col cols="12" sm="6" md="3">
+                  <v-text-field
+                    v-model="editedItem.manganh"
+                    label="Mã Ngành"
+                    outlined
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="2">
+                  <v-text-field
+                    v-model="editedItem.manhomnganh"
+                    label="Mã Nhóm Ngành"
+                    outlined
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="7">
+                  <v-text-field
+                    v-model="editedItem.tennganh"
+                    label="Tên Ngành"
+                    outlined
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="8">
+                  <v-text-field
+                    v-model="editedItem.diemchuan"
+                    label="Điểm Chuẩn"
+                    outlined
+                    clearable
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" text @click="close"> Hủy </v-btn>
+          <v-btn color="blue darken-1" text @click="save"> Thêm </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-snackbar v-model="snackbar" :timeout="timeout" right top>
+      {{ errText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false"
+          >Đóng</v-btn
+        >
+      </template>
+    </v-snackbar>
+  </v-container>
 </template>
 
 <script>
 export default {
   data: () => ({
+    valid: false,
+    snackbar: false,
+    errText: "",
+    dialogInsert: false,
+    timeout: 2000,
     selectedNamHoc: null,
     selectedKhuVuc: null,
     unloading: false,
@@ -76,6 +148,13 @@ export default {
     dsNamHoc: [],
     dsKhuVuc: [],
     dsTruong: [],
+    editedIndex: -1,
+    editedItem: {
+      manganh: "",
+      manhomnganh: "",
+      tennhomnganh: "",
+      diemchuan: ""
+    },
     headers: [
       {
         text: "Mã Ngành",
@@ -211,8 +290,17 @@ export default {
           });
         });
     },
-    UpdateDiemCuan(){
-        
+    UpdateDiemChuan(item) {
+      this.dialogInsert = true;
+      console.log(item);
+      this.editedIndex = this.dsNganh.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+    },
+    close() {
+      this.dialogInsert = false;
+    },
+    save() {
+      // console.log(this.selectedTruong, this.)
     }
   }
 };

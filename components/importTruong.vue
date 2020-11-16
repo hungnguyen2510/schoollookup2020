@@ -1,0 +1,281 @@
+<template>
+  <v-container fluid>
+    <v-file-input
+      v-model="fileExcel"
+      color="deep-purple accent-4"
+      counter
+      label="File excel input"
+      multiple
+      placeholder="Select your files"
+      prepend-icon="mdi-paperclip"
+      outlined
+      @change="handleLoadExcel"
+      :show-size="1000"
+    >
+      <template v-slot:selection="{ index, text }">
+        <v-chip v-if="index < 2" color="deep-purple accent-4" dark label small>
+          {{ text }}
+        </v-chip>
+
+        <span
+          v-else-if="index === 2"
+          class="overline grey--text text--darken-3 mx-2"
+        >
+          +{{ files.length - 2 }} File(s)
+        </span>
+      </template>
+    </v-file-input>
+    <v-data-table :items="dataImport" :headers="headers" class="elevation-1">
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-card>
+              <v-card-title class="headline"
+                >Are you sure you want to delete this item?</v-card-title
+              >
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeDelete"
+                  >Cancel</v-btn
+                >
+                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+                  >OK</v-btn
+                >
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-toolbar>
+      </template>
+      <template v-slot:[`item.matruong`]="{ item }">
+        <v-chip color="green" dark>
+          {{ item.matruong }}
+        </v-chip>
+      </template>
+      <template v-slot:[`item.manganh`]="{ item }">
+        <v-btn
+          rounded
+          color="green"
+          class="white--text"
+          white
+          @click="showMaNganh = !showMaNganh"
+          >Xem</v-btn
+        >
+        <v-chip color="orange" dark v-if="showMaNganh">
+          {{ item.manganh || "Không có mã ngành" }}
+        </v-chip>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon class="mr-2" @click="editItem(item)">
+          mdi-pencil
+        </v-icon>
+        <v-icon @click="deleteItem(item)">
+          mdi-delete
+        </v-icon>
+      </template>
+    </v-data-table>
+    <v-dialog v-model="dialogShowInsert" max-width="700px">
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          v-bind="attrs"
+          v-on="on"
+          color="primary"
+          fab
+          rounded
+          class="mt-3"
+          :disabled="dataImport.length === 0"
+          @click="InsertTruong"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </template>
+    </v-dialog>
+    <div class="text-center">
+      <v-btn
+        :loading="loading"
+        :disabled="loading || fileExcel == null"
+        color="green"
+        class="white--text"
+      >
+        Upload Server
+        <v-icon right dark>
+          mdi-cloud-upload
+        </v-icon>
+      </v-btn>
+    </div>
+  </v-container>
+</template>
+
+<script>
+import XLSX from "xlsx";
+export default {
+  data() {
+    return {
+      loader: null,
+      dialogDelete: false,
+      dialogShowInsert: false,
+      loading: false,
+      showMaNganh: false,
+      fileExcel: null,
+      dataImport: [],
+      editedIndex: -1,
+      editedItem: {
+        id: "",
+        matruong: "",
+        tentruong: "",
+        diachi: "",
+        email: "",
+        sdt: "",
+        website: "",
+        makhuvuc: "",
+        manganh: ""
+      },
+      defaultItem: {
+        id: "",
+        matruong: "",
+        tentruong: "",
+        diachi: "",
+        email: "",
+        sdt: "",
+        website: "",
+        makhuvuc: "",
+        manganh: ""
+      },
+      headers: [
+        {
+          text: "ID",
+          value: "id"
+        },
+        {
+          text: "Mã Trường",
+          value: "matruong"
+        },
+        {
+          text: "Tên Trường",
+          value: "tentruong"
+        },
+        {
+          text: "Địa Chỉ",
+          value: "diachi"
+        },
+        {
+          text: "Email",
+          value: "email"
+        },
+        {
+          text: "SĐT",
+          value: "sdt"
+        },
+        {
+          text: "Website",
+          value: "website"
+        },
+        {
+          text: "Mã Khu Vực",
+          value: "makhuvuc"
+        },
+        {
+          text: "Mã Ngành",
+          value: "manganh"
+        },
+        { text: "Actions", value: "actions", sortable: false }
+      ]
+    };
+  },
+  watch: {
+    dialogDelete(val) {
+      val || this.closeDelete();
+    }
+  },
+  methods: {
+    handleLoadExcel() {
+      this.loader = "loading";
+      const files = this.fileExcel;
+      console.log(files);
+      if (!files.length) {
+        return;
+      } else if (!/\.(xls|xlsx)$/.test(files[0].name.toLowerCase())) {
+        return alert(
+          "The upload format is incorrect. Please upload xls or xlsx format"
+        );
+      }
+      const reader = new FileReader();
+      if (reader.readAsBinaryString) {
+        reader.onload = e => {
+          const workbook = XLSX.read(reader.result, { type: "binary" });
+          const firstSheet = workbook.SheetNames[0];
+          const excelRows = XLSX.utils.sheet_to_row_object_array(
+            workbook.Sheets[firstSheet]
+          );
+          this.dataImport = excelRows;
+          this.loading = false;
+        };
+        reader.readAsBinaryString(files[0]);
+      }
+    },
+    InsertTruong() {
+      if (this.dataImport.length === 0) return;
+      const lastIDItem = this.dataImport[this.dataImport.length - 1]["id"];
+      console.log(lastIDItem);
+    },
+
+    deleteItem(item) {
+      this.editedIndex = this.dataImport.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.dialogDelete = true;
+    },
+
+    deleteItemConfirm() {
+      this.dataImport.splice(this.editedIndex, 1);
+      console.log(this.dataImport);
+      this.closeDelete();
+    },
+    closeDelete() {
+      this.dialogDelete = false;
+      this.$nextTick(() => {
+        this.editedItem  = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    }
+  }
+};
+</script>
+
+<style>
+.custom-loader {
+  animation: loader 1s infinite;
+  display: flex;
+}
+@-moz-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

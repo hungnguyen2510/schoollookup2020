@@ -97,34 +97,34 @@ export default {
       {
         text: "Mã Trường",
         align: "start",
-        value: "matruong",
+        value: "matruong"
       },
       {
         text: "Tên Trường",
-        value: "tentruong",
+        value: "tentruong"
       },
       {
         text: "Mã Trường",
         align: "end",
-        value: "diachi",
+        value: "diachi"
       },
       {
         text: "Actions",
-        value: "actions",
-      },
-    ],
+        value: "actions"
+      }
+    ]
   }),
   async created() {
     // this.checkSignIn();
     this.GetKhuVuc();
-    // this.readFromFirestore();
+    this.readFromFirestore();
   },
   // beforeDestroy() {
   //   this.removeAuthListener();
   // },
   methods: {
     async checkSignIn() {
-      this.removeAuthListener = this.$fire.auth.onAuthStateChanged((user) => {
+      this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
           console.log("Signed in as " + user.email);
         } else {
@@ -136,9 +136,9 @@ export default {
       this.$fire.firestore
         .collection("truong")
         .get()
-        .then((querySnapshot) => {
+        .then(querySnapshot => {
           // Immutable copy
-          querySnapshot.forEach((doc) => {
+          querySnapshot.forEach(doc => {
             this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
           });
           this.unloading = true;
@@ -149,9 +149,9 @@ export default {
       this.$fire.firestore
         .collection("khuVuc")
         .get()
-        .then((querySnapshot) => {
+        .then(querySnapshot => {
           // Immutable copy
-          querySnapshot.forEach((doc) => {
+          querySnapshot.forEach(doc => {
             this.dsKhuVuc = [...this.dsKhuVuc, { id: doc.id, ...doc.data() }];
             console.log(this.dsKhuVuc);
           });
@@ -164,12 +164,12 @@ export default {
         .collection("truong")
         .where("id", "==", id)
         .get()
-        .then((querySnapshot) => {
+        .then(querySnapshot => {
           // Immutable copy
-          querySnapshot.forEach((doc) => {
+          querySnapshot.forEach(doc => {
             this.itemTruong = [
               ...this.itemTruong,
-              { id: doc.id, ...doc.data() },
+              { id: doc.id, ...doc.data() }
             ];
             console.log(this.itemTruong);
           });
@@ -183,9 +183,9 @@ export default {
         this.$fire.firestore
           .collection("truong")
           .get()
-          .then((querySnapshot) => {
+          .then(querySnapshot => {
             // Immutable copy
-            querySnapshot.forEach((doc) => {
+            querySnapshot.forEach(doc => {
               this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
               // console.log(doc.data());
             });
@@ -197,9 +197,9 @@ export default {
           .collection("truong")
           .where("makhuvuc", "==", maKhuVuc)
           .get()
-          .then((querySnapshot) => {
+          .then(querySnapshot => {
             // Immutable copy
-            querySnapshot.forEach((doc) => {
+            querySnapshot.forEach(doc => {
               this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
               // console.log(doc.data());
             });
@@ -207,7 +207,7 @@ export default {
             // console.log(this.dsTruong);
           });
       }
-    },
-  },
+    }
+  }
 };
 </script>

@@ -55,7 +55,7 @@ export default {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
           console.log("Signed in as " + user.email);
-          this.$router.history.push("/management")
+          this.$router.history.push("/ql-diemchuan")
         }
       });
     },

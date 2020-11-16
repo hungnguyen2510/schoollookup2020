@@ -36,7 +36,7 @@ export default {
   }),
   async created() {
     // this.checkSignIn();
-    // this.readFromFirestore();
+    this.readFromFirestore();
   },
   // beforeDestroy() {
   //   this.removeAuthListener();
