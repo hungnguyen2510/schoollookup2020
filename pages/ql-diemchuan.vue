@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-select
           :items="dsKhuVuc"
           v-model="selectedKhuVuc"
@@ -13,7 +13,7 @@
           @input="GetTruongByKhuVucID"
         ></v-select>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-select
           :items="dsTruong"
           v-model="selectedTruong"
@@ -25,7 +25,7 @@
           @input="GetNamHoc"
         ></v-select>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-select
           :items="dsNamHoc"
           v-model="selectedNamHoc"
@@ -34,14 +34,26 @@
           item-value="idNamHoc"
           :menu-props="{ maxHeight: '300' }"
           outlined
-          @input="GetThongTinDiemChuanNganh"
+          @input="GetNganh"
+        ></v-select>
+      </v-col>
+      <v-col cols="3">
+        <v-select
+          :items="dsNganh"
+          v-model="selectedNganhHoc"
+          label="Chọn Ngành Học"
+          item-text="tennganh"
+          item-value="manganh"
+          :menu-props="{ maxHeight: '300' }"
+          outlined
+          @input="GetDiemChuan"
         ></v-select>
       </v-col>
 
       <v-col cols="12">
         <v-data-table
           :headers="headers"
-          :items="dsNganh"
+          :items="dsDiemChuan"
           sort-by="matruong"
           class="elevation-1"
           :loading="unloading"
@@ -53,9 +65,23 @@
                 <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
               </v-col>
               <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
+              <v-spacer></v-spacer> 
+              <v-dialog v-model="dialogInsert" max-width="500px">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="primary"
+                    dark
+                    class="mb-2"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    New Item
+                  </v-btn>
+                </template>
+              </v-dialog>
             </v-toolbar>
           </template>
+
           <template v-slot:[`item.actions`]="{ item }">
             <v-icon class="mr-2" color="green" @click="UpdateDiemChuan(item)">
               mdi-information
@@ -71,46 +97,46 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-              <v-text-field
-                v-model="selectedNamHoc"
-                label="Năm Học"
-                outlined
-                disabled
-              ></v-text-field>
-              <v-row>
-                <v-col cols="12" sm="6" md="3">
-                  <v-text-field
-                    v-model="editedItem.manganh"
-                    label="Mã Ngành"
-                    outlined
-                    disabled
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="2">
-                  <v-text-field
-                    v-model="editedItem.manhomnganh"
-                    label="Mã Nhóm Ngành"
-                    outlined
-                    disabled
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="7">
-                  <v-text-field
-                    v-model="editedItem.tennganh"
-                    label="Tên Ngành"
-                    outlined
-                    disabled
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="8">
-                  <v-text-field
-                    v-model="editedItem.diemchuan"
-                    label="Điểm Chuẩn"
-                    outlined
-                    clearable
-                  ></v-text-field>
-                </v-col>
-              </v-row>
+            <v-text-field
+              v-model="selectedNamHoc"
+              label="Năm Học"
+              outlined
+              disabled
+            ></v-text-field>
+            <v-row>
+              <v-col cols="12" sm="6" md="3">
+                <v-text-field
+                  v-model="editedItem.manganh"
+                  label="Mã Ngành"
+                  outlined
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="2">
+                <v-text-field
+                  v-model="editedItem.manhomnganh"
+                  label="Mã Nhóm Ngành"
+                  outlined
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="7">
+                <v-text-field
+                  v-model="editedItem.tennganh"
+                  label="Tên Ngành"
+                  outlined
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="8">
+                <v-text-field
+                  v-model="editedItem.diemchuan"
+                  label="Điểm Chuẩn"
+                  outlined
+                  clearable
+                ></v-text-field>
+              </v-col>
+            </v-row>
           </v-container>
         </v-card-text>
 
@@ -142,6 +168,7 @@ export default {
     timeout: 2000,
     selectedNamHoc: null,
     selectedKhuVuc: null,
+    selectedNganhHoc: null,
     unloading: false,
     selectedTruong: null,
     dsNganh: [],
@@ -149,6 +176,7 @@ export default {
     dsKhuVuc: [],
     dsTruong: [],
     editedIndex: -1,
+    dsDiemChuan: [],
     editedItem: {
       manganh: "",
       manhomnganh: "",
@@ -157,17 +185,8 @@ export default {
     },
     headers: [
       {
-        text: "Mã Ngành",
-        align: "start",
-        value: "manganh"
-      },
-      {
-        text: "Mã Nhóm Ngành",
-        value: "manhomnganh"
-      },
-      {
-        text: "Tên Ngành",
-        value: "tennganh"
+        text: "Khối",
+        value: "khoi"
       },
       {
         text: "Điểm Chuẩn",
@@ -179,6 +198,25 @@ export default {
       }
     ]
   }),
+  watch: {
+    selectedKhuVuc() {
+      (this.dsNganh = []),
+        (this.selectedNganhHoc = null),
+        (this.dsNamHoc = []),
+        (this.selectedNamHoc = null),
+        (this.dsTruong = []);
+      this.selectedTruong = null;
+    },
+    selectedTruong() {
+      (this.dsNamHoc = []),
+        (this.selectedNamHoc = null),
+        (this.dsNganh = []),
+        (this.selectedNganhHoc = null);
+    },
+    selectedNamHoc() {
+      (this.dsNganh = []), (this.selectedNganhHoc = null);
+    }
+  },
   async created() {
     this.checkSignIn();
     this.GetKhuVuc();
@@ -209,8 +247,6 @@ export default {
         });
     },
     GetTruongByKhuVucID(makhuvuc) {
-      this.dsTruong = [];
-      this.dsNamHoc = [];
       if (makhuvuc != 0) {
         this.$fire.firestore
           .collection("truong")
@@ -237,7 +273,6 @@ export default {
       }
     },
     GetNamHoc() {
-      this.dsNamHoc = [];
       this.$fire.firestore
         .collection("namhoc")
         .orderBy("idNamHoc", "desc")
@@ -250,9 +285,7 @@ export default {
           });
         });
     },
-    GetThongTinDiemChuanNganh() {
-      this.dsNganh = [];
-      this.unloading = true;
+    GetNganh() {
       let arrtmp = [];
       const arr1 = [];
       this.$fire.firestore
@@ -286,9 +319,15 @@ export default {
                   });
                 });
             }
-            console.log(this.dsNganh);
           });
         });
+    },
+    GetDiemChuan() {
+      console.log(
+        this.selectedNamHoc,
+        this.selectedNganhHoc,
+        this.selectedTruong
+      );
     },
     UpdateDiemChuan(item) {
       this.dialogInsert = true;
