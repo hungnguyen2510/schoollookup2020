@@ -35,12 +35,12 @@ export default {
     ],
   }),
   async created() {
-    this.checkSignIn();
-    this.readFromFirestore();
+    // this.checkSignIn();
+    // this.readFromFirestore();
   },
-  beforeDestroy() {
-    this.removeAuthListener();
-  },
+  // beforeDestroy() {
+  //   this.removeAuthListener();
+  // },
   methods: {
     async checkSignIn() {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
