@@ -1,6 +1,7 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
+    <v-navigation-drawer permanent
+        expand-on-hover app>
       <v-list>
         <v-list-item to="/">
           <v-list-item-icon>
@@ -45,19 +46,23 @@
         </v-list-group>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+
+    <!-- <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer />
-    </v-app-bar>
+    </v-app-bar> -->
     <v-main>
       <v-container>
         <nuxt />
       </v-container>
     </v-main>
+    <Footer/>
   </v-app>
 </template>
+
 <script>
+import Footer from "~/components/Footer.vue";
 export default {
   data: () => ({
     clipped: false,
@@ -78,8 +83,11 @@ export default {
         title: "Điểm Chuẩn",
         to: "/ql-diemchuan"
       },
-      { icon: "mdi-apps", title: "DS Ngành", to: "/ds-nganh" }
+      { icon: "mdi-apps", title: "Import", to: "/ds-nganh" }
     ]
-  })
+  }),
+  components: {
+    Footer
+  }
 };
 </script>

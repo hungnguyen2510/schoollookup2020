@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <v-container>
     <v-row justify="center" align="center">
       <v-col cols="12" sm="8" md="6">
         <div class="text-center">
@@ -13,14 +13,12 @@
         <v-text-field
           label="Nhập mã ngành hoặc tên ngành mà bạn muốn tìm kiếm"
           @input="timKiemNganh"
-          outlined        
+          outlined
         ></v-text-field>
       </v-col>
-      <v-col cols="12" sm="8" md="6">
-        <!-- <CardHome/> -->
-      </v-col>
     </v-row>
-  </div>
+    <CardHome />
+  </v-container>
 </template>
 
 <script>
@@ -30,9 +28,29 @@ import CardHome from "~/components/CardHome.vue";
 
 export default {
   data: () => ({
-    search:"",
+    search: "",
     dsNganh: [],
-    isLoading: false
+    isLoading: false,
+    cardData: [
+      {
+        id: 1,
+        titleCard: "Ngành Nghề",
+        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
+        overlay: false
+      },
+      {
+        id: 2,
+        titleCard: "",
+        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
+        overlay: false
+      },
+      {
+        id: 3,
+        titleCard: "Tìm Hiểu Ngành Nghề",
+        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
+        overlay: false
+      }
+    ]
   }),
   components: {
     Logo,
@@ -40,18 +58,26 @@ export default {
     VuetifyLogo
   },
   methods: {
-    async timKiemNganh(term){
+    async timKiemNganh(term) {
       this.dsTruong = [];
       this.isLoading = true;
-      const queryByTen = this.$fire.firestore.collection("nganh").orderBy('tennganh').startAt(term).endAt(term + '~');
-      const queryByMa = this.$fire.firestore.collection("nganh").orderBy('manganh').startAt(term).endAt(term + '~');
+      const queryByTen = this.$fire.firestore
+        .collection("nganh")
+        .orderBy("tennganh")
+        .startAt(term)
+        .endAt(term + "~");
+      const queryByMa = this.$fire.firestore
+        .collection("nganh")
+        .orderBy("manganh")
+        .startAt(term)
+        .endAt(term + "~");
       const results = await Promise.all([queryByTen.get(), queryByMa.get()]);
       results[0].forEach(doc => {
         this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
       });
       results[1].forEach(doc => {
         this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
-      }); 
+      });
       console.log(this.dsTruong);
     }
   }

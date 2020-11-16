@@ -43,7 +43,7 @@
         :items="dsNganh"
         sort-by="matruong"
         class="elevation-1"
-        :loading="!unloading"
+        :loading="unloading"
         loading-text="Loading... Please wait"
       >
         <template v-slot:top>
@@ -56,7 +56,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-icon class="mr-2" color="green">
+          <v-icon class="mr-2" color="green" @click="UpdateDiemCuan()">
             mdi-information
           </v-icon>
         </template>
@@ -173,7 +173,7 @@ export default {
     },
     GetThongTinDiemChuanNganh() {
       this.dsNganh = [];
-      this.unloading = false;
+      this.unloading = true;
       let arrtmp = [];
       const arr1 = [];
       this.$fire.firestore
@@ -203,13 +203,16 @@ export default {
                       { id: doc.id, ...doc.data() }
                     ];
 
-                    this.unloading = true;
+                    this.unloading = false;
                   });
                 });
             }
             console.log(this.dsNganh);
           });
         });
+    },
+    UpdateDiemCuan(){
+        
     }
   }
 };
