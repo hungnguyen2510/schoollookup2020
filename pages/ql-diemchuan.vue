@@ -46,14 +46,15 @@
           item-value="manganh"
           :menu-props="{ maxHeight: '300' }"
           outlined
-          @input="GetDiemChuan"
+          @input="GetDSKhoi"
         ></v-select>
       </v-col>
 
       <v-col cols="12">
         <v-data-table
           :headers="headers"
-          :items="dsDiemChuan"
+          :items="dsKhoi"
+          item-key="makhoi"
           sort-by="matruong"
           class="elevation-1"
           :loading="unloading"
@@ -65,7 +66,7 @@
                 <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
               </v-col>
               <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer> 
+              <v-spacer></v-spacer>
               <v-dialog v-model="dialogInsert" max-width="500px">
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -97,38 +98,24 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <v-text-field
-              v-model="selectedNamHoc"
-              label="Năm Học"
-              outlined
-              disabled
-            ></v-text-field>
             <v-row>
               <v-col cols="12" sm="6" md="3">
                 <v-text-field
-                  v-model="editedItem.manganh"
+                  v-model="editedItem.makhoi"
                   label="Mã Ngành"
                   outlined
                   disabled
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="2">
+              <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                  v-model="editedItem.manhomnganh"
+                  v-model="editedItem.tenkhoi"
                   label="Mã Nhóm Ngành"
                   outlined
                   disabled
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="7">
-                <v-text-field
-                  v-model="editedItem.tennganh"
-                  label="Tên Ngành"
-                  outlined
-                  disabled
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="8">
+              <v-col cols="12" sm="6" md="5">
                 <v-text-field
                   v-model="editedItem.diemchuan"
                   label="Điểm Chuẩn"
@@ -171,22 +158,27 @@ export default {
     selectedNganhHoc: null,
     unloading: false,
     selectedTruong: null,
+    dsKhoi: [],
     dsNganh: [],
     dsNamHoc: [],
     dsKhuVuc: [],
     dsTruong: [],
     editedIndex: -1,
     dsDiemChuan: [],
+    tempKhoi: [],
     editedItem: {
-      manganh: "",
-      manhomnganh: "",
-      tennhomnganh: "",
+      makhoi: "",
+      tenkhoi: "",
       diemchuan: ""
     },
     headers: [
       {
         text: "Khối",
-        value: "khoi"
+        value: "makhoi"
+      },
+      {
+        text: "Tổ Hợp Môn",
+        value: "tenkhoi"
       },
       {
         text: "Điểm Chuẩn",
@@ -206,15 +198,21 @@ export default {
         (this.selectedNamHoc = null),
         (this.dsTruong = []);
       this.selectedTruong = null;
+      this.dsKhoi = [];
     },
     selectedTruong() {
       (this.dsNamHoc = []),
         (this.selectedNamHoc = null),
         (this.dsNganh = []),
         (this.selectedNganhHoc = null);
+      this.dsKhoi = [];
     },
     selectedNamHoc() {
       (this.dsNganh = []), (this.selectedNganhHoc = null);
+      this.dsKhoi = [];
+    },
+    selectedNganhHoc() {
+      this.dsKhoi = [];
     }
   },
   async created() {
@@ -322,16 +320,55 @@ export default {
           });
         });
     },
-    GetDiemChuan() {
-      console.log(
-        this.selectedNamHoc,
-        this.selectedNganhHoc,
-        this.selectedTruong
-      );
+    GetDSKhoi() {
+      this.$fire.firestore
+        .collection("nganh")
+        .where("manganh", "==", this.selectedNganhHoc)
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          // console.log(querySnapshot.size,tmp.length)
+          querySnapshot.forEach(doc => {
+            // this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data()["khoi"]}];
+            // console.log(doc.data())
+            // console.log(doc.data()["khoi"]);
+            this.tempKhoi = doc.data()["khoi"];
+            this.$fire.firestore
+              .collection("khoi")
+              .where("makhoi", "in", doc.data()["khoi"])
+              .get()
+              .then(querySnapshot => {
+                // Immutable copy
+                // console.log(querySnapshot.size,tmp.length)
+                querySnapshot.forEach(doc => {
+                  this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data() }];
+                  console.log(this.dsKhoi)
+                });
+              });
+            this.$fire.firestore
+              .collection("diemchuan")
+              .where("makhoi", "in", this.tempKhoi)
+              .get()
+              .then(querySnapshot => {
+                // Immutable copy
+                // console.log(querySnapshot.size,tmp.length)
+                querySnapshot.forEach(doc => {
+                  console.log(doc.data());
+                  this.dsKhoi = this.dsKhoi.map((khoi) => {
+                    if(khoi.makhoi == doc.data().makhoi){
+                      return {...khoi, diemchuan:doc.data().diemchuan}
+                    }
+                    return khoi
+                  })
+                });
+              });
+            this.unloading = false;
+          });
+        });
     },
     UpdateDiemChuan(item) {
       this.dialogInsert = true;
-      console.log(item);
+      // console.log(item);
       this.editedIndex = this.dsNganh.indexOf(item);
       this.editedItem = Object.assign({}, item);
     },
@@ -339,7 +376,30 @@ export default {
       this.dialogInsert = false;
     },
     save() {
-      // console.log(this.selectedTruong, this.)
+      console.log(
+        this.selectedTruong,
+        this.selectedNganhHoc,
+        this.editedItem.makhoi,
+        this.editedItem.diemchuan
+      );
+      //call firebase add diemchuan
+      const dataAdd = {
+        matruong: this.selectedTruong,
+        manganh: this.selectedNganhHoc,
+        makhoi: this.editedItem.makhoi,
+        diemchuan: this.editedItem.diemchuan
+      };
+      try {
+        this.$fire.firestore
+          .collection("diemchuan")
+          .doc()
+          .set(dataAdd)
+          .then(() => {
+            console.log("Thêm thành công");
+          });
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 };

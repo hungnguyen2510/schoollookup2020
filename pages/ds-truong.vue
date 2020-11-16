@@ -104,7 +104,7 @@ export default {
         value: "tentruong"
       },
       {
-        text: "Mã Trường",
+        text: "Địa Chỉ",
         align: "end",
         value: "diachi"
       },
