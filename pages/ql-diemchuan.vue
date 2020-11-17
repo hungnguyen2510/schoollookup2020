@@ -54,38 +54,16 @@
         <v-data-table
           :headers="headers"
           :items="dsKhoi"
+          hide-default-footer
           item-key="makhoi"
           sort-by="matruong"
           class="elevation-1"
           :loading="unloading"
           loading-text="Loading... Please wait"
         >
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-col cols="12" sm="4" md="2">
-                <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
-              </v-col>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog v-model="dialogInsert" max-width="500px">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="primary"
-                    dark
-                    class="mb-2"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    New Item
-                  </v-btn>
-                </template>
-              </v-dialog>
-            </v-toolbar>
-          </template>
-
           <template v-slot:[`item.actions`]="{ item }">
-            <v-icon class="mr-2" color="green" @click="UpdateDiemChuan(item)">
-              mdi-information
+            <v-icon class="mr-2" color="green" @click="HandleDiemChuan(item)">
+              mdi-pencil
             </v-icon>
           </template>
         </v-data-table>
@@ -164,7 +142,7 @@ export default {
     dsKhuVuc: [],
     dsTruong: [],
     editedIndex: -1,
-    dsDiemChuan: [],
+    checkInsert: false,
     tempKhoi: [],
     editedItem: {
       makhoi: "",
@@ -312,8 +290,6 @@ export default {
                       ...this.dsNganh,
                       { id: doc.id, ...doc.data() }
                     ];
-
-                    this.unloading = false;
                   });
                 });
             }
@@ -321,6 +297,9 @@ export default {
         });
     },
     GetDSKhoi() {
+      this.dsKhoi = [];
+      this.unloading = true;
+      console.log(this.selectedNganhHoc);
       this.$fire.firestore
         .collection("nganh")
         .where("manganh", "==", this.selectedNganhHoc)
@@ -342,67 +321,92 @@ export default {
                 // console.log(querySnapshot.size,tmp.length)
                 querySnapshot.forEach(doc => {
                   this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data() }];
-                  console.log(this.dsKhoi)
                 });
               });
             this.$fire.firestore
               .collection("diemchuan")
               .where("makhoi", "in", this.tempKhoi)
+              .where("manganh", "==", this.selectedNganhHoc)
               .get()
               .then(querySnapshot => {
                 // Immutable copy
                 // console.log(querySnapshot.size,tmp.length)
                 querySnapshot.forEach(doc => {
-                  console.log(doc.data());
-                  this.dsKhoi = this.dsKhoi.map((khoi) => {
-                    if(khoi.makhoi == doc.data().makhoi){
-                      return {...khoi, diemchuan:doc.data().diemchuan}
+                  //   console.log(doc.data(), doc.id);
+                  this.dsKhoi = this.dsKhoi.map(khoi => {
+                    if (khoi.makhoi == doc.data().makhoi) {
+                      return {
+                        ...khoi,
+                        diemchuan: doc.data().diemchuan,
+                        idDiemChuan: doc.id
+                      };
                     }
-                    return khoi
-                  })
+                    return khoi;
+                  });
                 });
+                // console.log(this.dsKhoi);
               });
             this.unloading = false;
           });
         });
     },
-    UpdateDiemChuan(item) {
+    HandleDiemChuan(item) {
       this.dialogInsert = true;
-      // console.log(item);
       this.editedIndex = this.dsNganh.indexOf(item);
       this.editedItem = Object.assign({}, item);
+      this.checkInsert = this.editedItem.diemchuan ? true : false;
     },
     close() {
       this.dialogInsert = false;
     },
     save() {
-      console.log(
-        this.selectedTruong,
-        this.selectedNganhHoc,
-        this.editedItem.makhoi,
-        this.editedItem.diemchuan
-      );
       //call firebase add diemchuan
-      const dataAdd = {
-        matruong: this.selectedTruong,
-        manganh: this.selectedNganhHoc,
-        makhoi: this.editedItem.makhoi,
-        diemchuan: this.editedItem.diemchuan
-      };
-      try {
+
+      if (!this.checkInsert) {
+        const dataAdd = {
+          matruong: this.selectedTruong,
+          manganh: this.selectedNganhHoc,
+          makhoi: this.editedItem.makhoi,
+          diemchuan: this.editedItem.diemchuan
+        };
+        console.log("insert", dataAdd);
+        try {
+          this.$fire.firestore
+            .collection("diemchuan")
+            .doc()
+            .set(dataAdd)
+            .then(() => {
+              console.log("Thêm thành công");
+              this.dialogInsert = false;
+              this.dsKhoi = [];
+              this.GetDSKhoi();
+            });
+        } catch (e) {
+          console.log(e);
+        }
+      } else {
+        const dataUpdate = {
+          diemchuan: this.editedItem.diemchuan,
+          idDiemChuan: this.editedItem.idDiemChuan
+        };
+        console.log("Update", dataUpdate);
         this.$fire.firestore
           .collection("diemchuan")
-          .doc()
-          .set(dataAdd)
+          .doc(dataUpdate.idDiemChuan)
+          .update({
+            diemchuan: dataUpdate.diemchuan
+          })
           .then(() => {
-            console.log("Thêm thành công");
+            console.log("Updated");
+            this.dialogInsert = false;
+            this.dsKhoi = [];
+            this.GetDSKhoi();
+          })
+          .catch(() => {
+            console.log("Error");
           });
-      } catch (e) {
-        console.log(e);
       }
     }
   }
 };
 </script>
-
-<style></style>

@@ -1,6 +1,6 @@
 <template>
   <v-footer dark padless>
-    <v-card flat tile class="indigo lighten-1 white--text text-center" style="width:100%">
+    <v-card flat tile class="blue-grey darken-3 white--text text-center" style="width:100%">
       <v-card-text class="white--text">
         {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
       </v-card-text>

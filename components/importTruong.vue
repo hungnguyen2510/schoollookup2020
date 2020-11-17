@@ -61,9 +61,8 @@
           @click="showMaNganh = !showMaNganh"
           >Xem</v-btn
         >
-        <v-chip color="orange" dark v-if="showMaNganh">
-          {{ item.manganh || "Không có mã ngành" }}
-        </v-chip>
+        <v-dialog v-model="showMaNganh" max-width="700px">
+        </v-dialog>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-icon class="mr-2" @click="editItem(item)">
@@ -195,6 +194,7 @@ export default {
       if (!files.length) {
         return;
       } else if (!/\.(xls|xlsx)$/.test(files[0].name.toLowerCase())) {
+        this.fileExcel = null;
         return alert(
           "The upload format is incorrect. Please upload xls or xlsx format"
         );
@@ -233,7 +233,7 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem  = Object.assign({}, this.defaultItem);
+        this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
     }
