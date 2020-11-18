@@ -271,7 +271,7 @@ export default {
         .then(querySnapshot => {
           // Immutable copy
           querySnapshot.forEach(doc => {
-            // console.log(doc.data().manganh);
+            console.log(this.selectedTruong);
             arrtmp = doc.data().manganh;
             // arrtmp = doc.data().manganh.splice(10,doc.data().manganh.length);
             // console.log(arrtmp);
@@ -306,19 +306,13 @@ export default {
         .get()
         .then(querySnapshot => {
           // Immutable copy
-          // console.log(querySnapshot.size,tmp.length)
           querySnapshot.forEach(doc => {
-            // this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data()["khoi"]}];
-            // console.log(doc.data())
-            // console.log(doc.data()["khoi"]);
             this.tempKhoi = doc.data()["khoi"];
             this.$fire.firestore
               .collection("khoi")
               .where("makhoi", "in", doc.data()["khoi"])
               .get()
               .then(querySnapshot => {
-                // Immutable copy
-                // console.log(querySnapshot.size,tmp.length)
                 querySnapshot.forEach(doc => {
                   this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data() }];
                 });
@@ -327,6 +321,7 @@ export default {
               .collection("diemchuan")
               .where("makhoi", "in", this.tempKhoi)
               .where("manganh", "==", this.selectedNganhHoc)
+              .where("matruong", "==", this.selectedTruong)
               .get()
               .then(querySnapshot => {
                 // Immutable copy

@@ -11,7 +11,7 @@
       <template v-slot:top>
         <v-toolbar flat>
           <v-col cols="12" sm="4" md="2">
-            <v-toolbar-title>Danh Sách Trường</v-toolbar-title>
+            <v-toolbar-title>{{ title }}</v-toolbar-title>
           </v-col>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
@@ -36,7 +36,7 @@
         </v-icon>
       </template>
     </v-data-table>
-    <v-dialog v-if="itemTruong.length > 0" v-model="dialog" width="500">
+    <v-dialog v-if="itemTruong.length > 0" v-model="dialog" width="800">
       <v-card>
         <v-img
           src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
@@ -52,7 +52,9 @@
         </v-card-subtitle>
 
         <v-card-actions>
-          <v-btn color="orange lighten-2" text> Xem thêm </v-btn>
+          <v-btn color="orange lighten-2" @click="show = !show" text>
+            Xem thêm
+          </v-btn>
 
           <v-spacer></v-spacer>
 
@@ -65,16 +67,19 @@
           <div v-show="show">
             <v-divider></v-divider>
             <v-card-text>
-              <strong>Địa Chỉ:</strong> {{ itemTruong[0]["diachi"] }}
+              <strong>Địa Chỉ: </strong> {{ itemTruong[0]["diachi"] }}
             </v-card-text>
             <v-card-text>
-              <strong>Số Điện Thoại:</strong> {{ itemTruong[0]["sdt"] }}
+              <strong>Số Điện Thoại: </strong> {{ itemTruong[0]["sdt"] }}
             </v-card-text>
             <v-card-text>
-              <strong>Website:</strong> {{ itemTruong[0]["website"] }}
+              <strong>Website: </strong><a>{{ itemTruong[0]["website"] }}</a>
             </v-card-text>
             <v-card-text>
-              <strong>Email:</strong> {{ itemTruong[0]["email"] }}
+              <strong>Email: </strong> {{ itemTruong[0]["email"] }}
+            </v-card-text>
+            <v-card-text>
+              <strong>Ngành đào tạo: </strong> {{ itemTruong[0]["manganh"] }}
             </v-card-text>
           </div>
         </v-expand-transition>
@@ -87,9 +92,11 @@
 export default {
   data: () => ({
     show: false,
+    title: "",
     dialog: false,
     selectedKhuVuc: null,
     itemTruong: [],
+    itemNganhByTruong: [],
     dsTruong: [],
     dsKhuVuc: [],
     unloading: false,
@@ -115,23 +122,11 @@ export default {
     ]
   }),
   async created() {
-    // this.checkSignIn();
     this.GetKhuVuc();
     this.readFromFirestore();
+    this.title = "Danh Sách Trường";
   },
-  // beforeDestroy() {
-  //   this.removeAuthListener();
-  // },
   methods: {
-    async checkSignIn() {
-      this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
-        if (user) {
-          console.log("Signed in as " + user.email);
-        } else {
-          this.$router.history.push("/login");
-        }
-      });
-    },
     async readFromFirestore() {
       this.$fire.firestore
         .collection("truong")
@@ -157,12 +152,12 @@ export default {
           });
         });
     },
-    inforTruong({ id, matruong }) {
+    inforTruong({ matruong, manganh }) {
       this.dialog = true;
       this.itemTruong = [];
       this.$fire.firestore
         .collection("truong")
-        .where("id", "==", id)
+        .where("matruong", "==", matruong)
         .get()
         .then(querySnapshot => {
           // Immutable copy
@@ -171,17 +166,16 @@ export default {
               ...this.itemTruong,
               { id: doc.id, ...doc.data() }
             ];
-            console.log(this.itemTruong);
           });
           this.unloading = true;
-          // console.log(this.dsTruong);
         });
     },
     FilterKhuVuc(maKhuVuc) {
       this.dsTruong = [];
-      if (maKhuVuc == 0) {
+      if (maKhuVuc != 0) {
         this.$fire.firestore
           .collection("truong")
+          .where("makhuvuc", "==", maKhuVuc)
           .get()
           .then(querySnapshot => {
             // Immutable copy
@@ -190,12 +184,10 @@ export default {
               // console.log(doc.data());
             });
             this.unloading = true;
-            // console.log(this.dsTruong);
           });
       } else {
         this.$fire.firestore
           .collection("truong")
-          .where("makhuvuc", "==", maKhuVuc)
           .get()
           .then(querySnapshot => {
             // Immutable copy
