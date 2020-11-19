@@ -47,7 +47,7 @@ export default {
       },
       {
         id: 2,
-        titleCard: "",
+        titleCard: "Tìm Hiểu Ngành Nghề",
         image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
       },
       {
@@ -60,6 +60,25 @@ export default {
         image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
       }
     ]
-  })
+  }),
+  created() {
+    this.GetNhomNganh()
+  },
+  methods:{
+     GetNhomNganh() {
+      this.$fire.firestore
+        .collection("nhomnganh")
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          querySnapshot.forEach(doc => {
+            // this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
+            console.log(doc.data());
+          });
+          // this.unloading = true;
+          // console.log(this.dsNganh);
+        });
+    }
+  }
 };
 </script>

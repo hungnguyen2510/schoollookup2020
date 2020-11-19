@@ -194,6 +194,7 @@ export default {
     }
   },
   async created() {
+    
     this.checkSignIn();
     this.GetKhuVuc();
   },

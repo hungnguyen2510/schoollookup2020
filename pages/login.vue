@@ -42,7 +42,7 @@ export default {
   data: () => ({
     email: null,
     password: null,
-    show: false
+    show: false,
   }),
   async created() {
     this.checkSignIn();
@@ -55,7 +55,7 @@ export default {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
           console.log("Signed in as " + user.email);
-          this.$router.history.push("/ql-diemchuan")
+          this.$router.history.push("/")
         }
       });
     },
@@ -66,7 +66,7 @@ export default {
           this.password
         );
       } catch (e) {
-        console.log(e);
+        console.log(e.code);
       }
     }
   }

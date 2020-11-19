@@ -16,10 +16,8 @@
           <v-list-item-title class="white--text">Home</v-list-item-title>
         </v-list-item>
 
-        <v-list-group
-          no-action
-        >
-        <v-icon slot="prependIcon" color="white">mdi-account-circle</v-icon>
+        <v-list-group no-action>
+          <v-icon slot="prependIcon" color="white">mdi-account-circle</v-icon>
           <template v-slot:activator>
             <v-list-item-title class="white--text">Danh Sách</v-list-item-title>
           </template>
@@ -51,8 +49,12 @@
             <v-list-item-icon>
               <v-icon v-text="item.icon" class="white--text"></v-icon>
             </v-list-item-icon>
-            <v-list-item-title class="white--text" v-text="item.title"></v-list-item-title>
+            <v-list-item-title
+              class="white--text"
+              v-text="item.title"
+            ></v-list-item-title>
           </v-list-item>
+          <v-btn @click="SignOut()">Sign out</v-btn>
         </v-list-group>
       </v-list>
     </v-navigation-drawer>
@@ -71,7 +73,6 @@ export default {
   data: () => ({
     clipped: false,
     drawer: false,
-    user: false,
     fixed: false,
     title: "School Lookup",
     danhsach: [
@@ -93,6 +94,16 @@ export default {
   }),
   components: {
     Footer
+  },
+  methods: {
+    SignOut() {
+      this.$fire.auth.signOut().then(() =>{
+        console.log("Sign-out successful")
+        this.user = false
+      }).catch(() =>{
+        console.log("Sign-out failed")
+      })
+    }
   }
 };
 </script>

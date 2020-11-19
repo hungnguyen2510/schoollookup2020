@@ -57,37 +57,25 @@
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
                         v-model="editedItem.matruong"
-                        label="Mã Trường"
+                        label="Mã ngành"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.manganh"
+                        label="Mã ngành"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="12">
                       <v-text-field
-                        v-model="editedItem.tentruong"
-                        label="Tên Trường"
+                        v-model="editedItem.makhoi"
+                        label="Tên ngành"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
-                        v-model="editedItem.diachi"
-                        label="Địa Chỉ"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        v-model="editedItem.email"
-                        label="Email"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        v-model="editedItem.sdt"
-                        label="Số Điện Thoại"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        v-model="editedItem.website"
-                        label="Website"
+                        v-model="editedItem.diemchuan"
+                        label="Mã nhóm ngành"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -107,29 +95,10 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:[`item.matruong`]="{ item }">
-        <v-chip color="green" dark>
-          {{ item.matruong }}
-        </v-chip>
-      </template>
       <template v-slot:[`item.manganh`]="{ item }">
-        <v-btn
-          rounded
-          color="green"
-          class="white--text"
-          white
-          @click="showMaNganh = !showMaNganh"
-          >Xem</v-btn
-        >
-
-        <v-dialog v-model="showMaNganh" max-width="700px">
-          <v-card>
-            <v-card-title>
-              Mã Ngành
-            </v-card-title>
-            <v-card-text>{{ item.manganh }}</v-card-text>
-          </v-card>
-        </v-dialog>
+        <v-chip color="green" dark>
+          {{ item.manganh }}
+        </v-chip>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon class="mr-2" @click="editItem(item)" color="orange">
@@ -141,7 +110,7 @@
       </template>
     </v-data-table>
     <!-- <v-dialog v-model="dialogShowInsert" max-width="700px"> -->
-      <!-- <template v-slot:activator="{ on, attrs }">
+    <!-- <template v-slot:activator="{ on, attrs }">
         <v-btn
           v-bind="attrs"
           v-on="on"
@@ -183,62 +152,37 @@ export default {
       dialogDelete: false,
       dialogShowInsert: false,
       loading: false,
-      showMaNganh: false,
       fileExcel: null,
       dataImport: [],
       editedIndex: -1,
       editedItem: {
+        manganh: "",
+        makhoi: "",
         matruong: "",
-        tentruong: "",
-        diachi: "",
-        email: "",
-        sdt: "",
-        website: "",
-        makhuvuc: "",
-        manganh: ""
+        diemchuan: ""
       },
       defaultItem: {
+        manganh: "",
+        makhoi: "",
         matruong: "",
-        tentruong: "",
-        diachi: "",
-        email: "",
-        sdt: "",
-        website: "",
-        makhuvuc: "",
-        manganh: ""
+        diemchuan: ""
       },
       headers: [
+        {
+          text: "Mã Ngành",
+          value: "manganh"
+        },
+        {
+          text: "Mã Khối",
+          value: "makhoi"
+        },
         {
           text: "Mã Trường",
           value: "matruong"
         },
         {
-          text: "Tên Trường",
-          value: "tentruong"
-        },
-        {
-          text: "Địa Chỉ",
-          value: "diachi"
-        },
-        {
-          text: "Email",
-          value: "email"
-        },
-        {
-          text: "SĐT",
-          value: "sdt"
-        },
-        {
-          text: "Website",
-          value: "website"
-        },
-        {
-          text: "Mã Khu Vực",
-          value: "makhuvuc"
-        },
-        {
-          text: "Mã Ngành",
-          value: "manganh"
+          text: "Điểm Chuẩn",
+          value: "diemchuan"
         },
         { text: "Actions", value: "actions", sortable: false }
       ]

@@ -17,28 +17,47 @@
     </v-toolbar>
     <v-spacer></v-spacer>
     <!-- <ImportTruong /> -->
-    <div v-if="tab==1">
-        <ImportTruong />
+    <div v-if="tab == 1">
+      <ImportTruong />
     </div>
-    <div v-else-if="tab==2">
-        fdsfgdgs
+    <div v-else-if="tab == 2">
+      <ImportNganh />
+    </div>
+    <div v-else-if="tab == 3">
+      <ImportDiem />
     </div>
   </v-container>
 </template>
 
 <script>
 import ImportTruong from "../components/importTruong";
+import ImportNganh from "../components/importNganh";
+import ImportDiem from "../components/importDiem";
 export default {
   data: () => ({
     tab: 1
   }),
   components: {
-    ImportTruong
+    ImportTruong,
+    ImportNganh,
+    ImportDiem
+  },
+  created() {
+    this.checkSignIn();
   },
   methods: {
     changeTab(item) {
       this.tab = item;
       console.log(this.tab);
+    },
+    async checkSignIn() {
+      this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
+        if (user) {
+          console.log("Signed in as " + user.email);
+        } else {
+          this.$router.history.push("/login");
+        }
+      });
     }
   }
 };
