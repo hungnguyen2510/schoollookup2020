@@ -3,19 +3,15 @@
     <v-card
       class="mx-auto"
       max-width="400"
-      v-for="item in cardData"
-      v-bind:key="item.id"
+      v-for="(item, index) in cardData"
+      v-bind:key="index"
     >
-      <v-img
-        class="white--text align-end"
-        height="200px"
-        v-bind:src="item.image"
-      >
-        <v-card-title>{{item.titleCard}}</v-card-title>
+      <v-img class="align-end" height="200px" width="500px">
+        <v-card-title>{{item.tennhomnganh}}</v-card-title>
       </v-img>
 
-      <v-card-subtitle class="pb-0">
-        Number 10
+      <v-card-subtitle>
+        {{item.manhomnganh}}
       </v-card-subtitle>
 
       <v-card-text class="text--primary">
@@ -26,11 +22,7 @@
 
       <v-card-actions>
         <v-btn color="orange" text>
-          Share
-        </v-btn>
-
-        <v-btn color="orange" text>
-          Explore
+          Xem Thêm
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -39,44 +31,23 @@
 <script>
 export default {
   data: () => ({
-    cardData: [
-      {
-        id: 1,
-        titleCard: "Ngành Nghề",
-        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-      },
-      {
-        id: 2,
-        titleCard: "Tìm Hiểu Ngành Nghề",
-        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-      },
-      {
-        id: 3,
-        titleCard: "Tìm Hiểu Ngành Nghề",
-        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-      },{
-        id: 4,
-        titleCard: "Tìm Hiểu Ngành Nghề",
-        image: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-      }
-    ]
+    cardData: []
   }),
-  created() {
-    this.GetNhomNganh()
+  async created() {
+    await this.GetNhomNganh();
+    console.log(this.cardData)
+    //  v-bind:src="cardData[index].image"
   },
-  methods:{
-     GetNhomNganh() {
-      this.$fire.firestore
-        .collection("nhomnganh")
+  methods: {
+    GetNhomNganh() {
+      return this.$fire.firestore
+        .collection("nhomnganh").limit(4)
         .get()
         .then(querySnapshot => {
           // Immutable copy
           querySnapshot.forEach(doc => {
-            // this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
-            console.log(doc.data());
+            this.cardData = [...this.cardData, { id: doc.id, ...doc.data() }];
           });
-          // this.unloading = true;
-          // console.log(this.dsNganh);
         });
     }
   }

@@ -28,23 +28,6 @@
     <v-data-table :items="dataImport" :headers="headers" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="headline"
-                >Bạn Có Muốn Xóa Trường Này Không?</v-card-title
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="closeDelete"
-                  >Cancel</v-btn
-                >
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                  >OK</v-btn
-                >
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
           <v-dialog v-model="dialog" max-width="800px">
             <v-card>
               <v-card-title>
@@ -141,7 +124,7 @@
       </template>
     </v-data-table>
     <!-- <v-dialog v-model="dialogShowInsert" max-width="700px"> -->
-      <!-- <template v-slot:activator="{ on, attrs }">
+    <!-- <template v-slot:activator="{ on, attrs }">
         <v-btn
           v-bind="attrs"
           v-on="on"
@@ -175,12 +158,12 @@
 
 <script>
 import XLSX from "xlsx";
+import swal from "sweetalert";
 export default {
   data() {
     return {
       loader: null,
       dialog: false,
-      dialogDelete: false,
       dialogShowInsert: false,
       loading: false,
       showMaNganh: false,
@@ -282,7 +265,29 @@ export default {
     // },
 
     UploadFile() {
-      console.log(this.dataImport);
+      this.dataImport.map((item) => {
+        item.manganh = item.manganh.replace("[","").replace("]","").split(",")
+      }) 
+      const batch = this.$fire.firestore.batch();
+      this.$fire.firestore
+        .collection("truong")
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          querySnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          this.dataImport.forEach(data => {
+            const collection = this.$fire.firestore.collection("truong").doc();
+            batch.set(collection, data);
+          });
+          batch
+            .commit()
+            .then(() => {
+              swal("Thêm dữ liệu TRƯỜNG thành công!", "", "success");
+            })
+            .catch(console.log);
+        });
     },
 
     editItem(item) {
@@ -295,20 +300,22 @@ export default {
     deleteItem(item) {
       this.editedIndex = this.dataImport.indexOf(item);
       this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.dataImport.splice(this.editedIndex, 1);
-      console.log(this.dataImport);
-      this.closeDelete();
-    },
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+      swal({
+        title: "Bạn có chắc xóa trường này không?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.dataImport.splice(this.editedIndex, 1);
+          swal("Xóa thành công", {
+            icon: "success"
+          });
+        } else {
+          swal("Xóa không thành công!");
+        }
       });
+      // this.dialogDelete = true;
     },
     close() {
       this.dialog = false;

@@ -194,7 +194,6 @@ export default {
     }
   },
   async created() {
-    
     this.checkSignIn();
     this.GetKhuVuc();
   },
@@ -272,12 +271,12 @@ export default {
         .then(querySnapshot => {
           // Immutable copy
           querySnapshot.forEach(doc => {
-            console.log(this.selectedTruong);
+            // console.log(this.selectedTruong);
             arrtmp = doc.data().manganh;
             // arrtmp = doc.data().manganh.splice(10,doc.data().manganh.length);
-            // console.log(arrtmp);
+            console.log(arrtmp);
+            console.log(arrtmp.length);
             while (arrtmp.length) {
-              // console.log(arrtmp.splice(0, 10));
               const tmp = arrtmp.splice(0, 10);
               this.$fire.firestore
                 .collection("nganh")
