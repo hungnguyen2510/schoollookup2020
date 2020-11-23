@@ -48,12 +48,11 @@ export default {
   methods: {
     changeTab(item) {
       this.tab = item;
-      console.log(this.tab);
     },
     async checkSignIn() {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
-          console.log("Signed in as " + user.email);
+          // console.log("Signed in as " + user.email);
         } else {
           this.$router.history.push("/login");
         }

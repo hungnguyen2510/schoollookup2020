@@ -38,36 +38,47 @@
 </template>
 
 <script>
+import swal from "sweetalert";
 export default {
   data: () => ({
     email: null,
     password: null,
-    show: false,
+    show: false
   }),
   async created() {
     this.checkSignIn();
   },
-  beforeDestroy(){
+  beforeDestroy() {
     this.removeAuthListener();
   },
   methods: {
     async checkSignIn() {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
-          console.log("Signed in as " + user.email);
-          this.$router.history.push("/")
+          swal("Đăng nhập thành công!", user.email, "success");
+          this.$router.history.push("/");
         }
       });
     },
     async Login() {
-      try {
-        await this.$fire.auth.createUserWithEmailAndPassword(
+      await this.$fire.auth
+        .createUserWithEmailAndPassword(
           this.email + "@gmail.com",
           this.password
-        );
-      } catch (e) {
-        console.log(e.code);
-      }
+        )
+        .then(item => {})
+        .catch(err => {
+          if (err.code == "auth/email-already-in-use") {
+            this.$fire.auth
+              .signInWithEmailAndPassword(
+                this.email + "@gmail.com",
+                this.password
+              )
+          }
+          if (err.code == "auth/weak-password") {
+            swal("Mật khẩu phải trên 6 kí tự", "", "warning");
+          }
+        });
     }
   }
 };

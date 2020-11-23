@@ -61,7 +61,7 @@ export default {
             this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
           });
           this.unloading = true;
-          console.log(this.dsNganh);
+          // console.log(this.dsNganh);
         });
     }
   }

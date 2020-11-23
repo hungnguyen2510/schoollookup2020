@@ -204,7 +204,7 @@ export default {
     async checkSignIn() {
       this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
         if (user) {
-          console.log("Signed in as " + user.email);
+          // console.log("Signed in as " + user.email);
         } else {
           this.$router.history.push("/login");
         }
@@ -299,7 +299,7 @@ export default {
     GetDSKhoi() {
       this.dsKhoi = [];
       this.unloading = true;
-      console.log(this.selectedNganhHoc);
+      // console.log(this.selectedNganhHoc);
       this.$fire.firestore
         .collection("nganh")
         .where("manganh", "==", this.selectedNganhHoc)

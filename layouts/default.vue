@@ -37,11 +37,11 @@
             </v-list-item-content>
           </v-list-item>
         </v-list-group>
-        <v-list-group no-action>
+        <v-list-group no-action v-if="showMenuAdmin">
           <v-icon slot="prependIcon" color="white">mdi-account-circle</v-icon>
           <template v-slot:activator>
             <v-list-item-content>
-              <v-list-item-title class="white--text">Actions</v-list-item-title>
+              <v-list-item-title class="white--text">Admin</v-list-item-title>
             </v-list-item-content>
           </template>
 
@@ -69,12 +69,14 @@
 
 <script>
 import Footer from "~/components/Footer.vue";
+import swal from "sweetalert";
 export default {
   data: () => ({
     clipped: false,
     drawer: false,
     fixed: false,
     title: "School Lookup",
+    showMenuAdmin: false,
     danhsach: [
       {
         icon: "mdi-apps",
@@ -95,14 +97,35 @@ export default {
   components: {
     Footer
   },
+  async created() {
+    this.checkSignIn();
+  },
+  beforeDestroy() {
+    this.removeAuthListener();
+  },
   methods: {
+    async checkSignIn() {
+      this.removeAuthListener = this.$fire.auth.onAuthStateChanged(user => {
+        if (user) {
+          this.showMenuAdmin = true;
+          swal("Đăng nhập thành công!", user.email, "success");
+          this.$router.history.push("/");
+        }
+        else{
+          this.showMenuAdmin = false;
+          console.log("Chua dang nhap")
+        }
+      });
+    },
     SignOut() {
-      this.$fire.auth.signOut().then(() =>{
-        console.log("Sign-out successful")
-        this.user = false
-      }).catch(() =>{
-        console.log("Sign-out failed")
-      })
+      this.$fire.auth
+        .signOut()
+        .then(() => {
+          console.log("Sign-out successful");
+        })
+        .catch(() => {
+          console.log("Sign-out failed");
+        });
     }
   }
 };
