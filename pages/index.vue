@@ -72,11 +72,14 @@ export default {
         .startAt(term)
         .endAt(term + "~");
       const results = await Promise.all([queryByTen.get(), queryByMa.get()]);
+      // console.log(results)
       results[0].forEach(doc => {
         this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
+        console.log(doc.data())
       });
       results[1].forEach(doc => {
         this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
+        // console.log(doc.data())
       });
       console.log(this.dsTruong);
     }

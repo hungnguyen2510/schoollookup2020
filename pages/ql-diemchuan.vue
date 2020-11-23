@@ -274,8 +274,8 @@ export default {
             // console.log(this.selectedTruong);
             arrtmp = doc.data().manganh;
             // arrtmp = doc.data().manganh.splice(10,doc.data().manganh.length);
-            console.log(arrtmp);
-            console.log(arrtmp.length);
+            // console.log(arrtmp);
+            // console.log(arrtmp.length);
             while (arrtmp.length) {
               const tmp = arrtmp.splice(0, 10);
               this.$fire.firestore

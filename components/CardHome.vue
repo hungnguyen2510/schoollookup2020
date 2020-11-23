@@ -35,7 +35,7 @@ export default {
   }),
   async created() {
     await this.GetNhomNganh();
-    console.log(this.cardData)
+    // console.log(this.cardData)
     //  v-bind:src="cardData[index].image"
   },
   methods: {

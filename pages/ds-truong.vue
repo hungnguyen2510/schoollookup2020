@@ -63,26 +63,31 @@
           </v-btn>
         </v-card-actions>
 
-        <v-expand-transition>
-          <div v-show="show">
-            <v-divider></v-divider>
-            <v-card-text>
-              <strong>Địa Chỉ: </strong> {{ itemTruong[0]["diachi"] }}
-            </v-card-text>
-            <v-card-text>
-              <strong>Số Điện Thoại: </strong> {{ itemTruong[0]["sdt"] }}
-            </v-card-text>
-            <v-card-text>
-              <strong>Website: </strong><a>{{ itemTruong[0]["website"] }}</a>
-            </v-card-text>
-            <v-card-text>
-              <strong>Email: </strong> {{ itemTruong[0]["email"] }}
-            </v-card-text>
-            <v-card-text>
-              <strong>Ngành đào tạo: </strong> {{ itemTruong[0]["manganh"] }}
-            </v-card-text>
-          </div>
-        </v-expand-transition>
+        <!-- <v-expand-transition> -->
+        <div v-show="show">
+          <v-divider></v-divider>
+          <v-card-text>
+            <strong>Địa Chỉ: </strong> {{ itemTruong[0]["diachi"] }}
+          </v-card-text>
+          <v-card-text>
+            <strong>Số Điện Thoại: </strong> {{ itemTruong[0]["sdt"] }}
+          </v-card-text>
+          <v-card-text>
+            <strong>Website: </strong><a>{{ itemTruong[0]["website"] }}</a>
+          </v-card-text>
+          <v-card-text>
+            <strong>Email: </strong> {{ itemTruong[0]["email"] }}
+          </v-card-text>
+          <v-card-text>
+            <strong>Ngành đào tạo: </strong>
+            <v-data-table
+              :items="itemNganhByTruong"
+              :headers="headerNganh"
+              item-key="manganh"
+            ></v-data-table>
+          </v-card-text>
+        </div>
+        <!-- </v-expand-transition> -->
       </v-card>
     </v-dialog>
   </v-container>
@@ -90,6 +95,7 @@
 
 <script>
 export default {
+  // {{ itemTruong[0]["manganh"] }}
   data: () => ({
     show: false,
     title: "",
@@ -116,8 +122,19 @@ export default {
         value: "diachi"
       },
       {
-        text: "Actions",
+        text: "Thông Tin Thêm",
         value: "actions"
+      }
+    ],
+    headerNganh: [
+      {
+        text: "Mã Ngành",
+        align: "start",
+        value: "manganh"
+      },
+      {
+        text: "Tên Ngành",
+        value: "tennganh"
       }
     ]
   }),
@@ -137,7 +154,7 @@ export default {
             this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
           });
           this.unloading = true;
-          console.log(this.dsTruong);
+          // console.log(this.dsTruong);
         });
     },
     GetKhuVuc() {
@@ -148,11 +165,12 @@ export default {
           // Immutable copy
           querySnapshot.forEach(doc => {
             this.dsKhuVuc = [...this.dsKhuVuc, { id: doc.id, ...doc.data() }];
-            console.log(this.dsKhuVuc);
+            // console.log(this.dsKhuVuc);
           });
         });
     },
     inforTruong({ matruong, manganh }) {
+      this.itemNganhByTruong = [];
       this.dialog = true;
       this.itemTruong = [];
       this.$fire.firestore
@@ -169,6 +187,27 @@ export default {
           });
           this.unloading = true;
         });
+      let arrtmp = [];
+      const arr1 = [];
+      arrtmp = manganh
+      while (arrtmp.length) {
+        const tmp = arrtmp.splice(0, 10);
+        this.$fire.firestore
+          .collection("nganh")
+          .where("manganh", "in", tmp)
+          .get()
+          .then(querySnapshot => {
+            // Immutable copy
+            querySnapshot.forEach(doc => {
+              this.itemNganhByTruong = [
+                ...this.itemNganhByTruong,
+                { id: doc.id, ...doc.data() }
+              ];
+            });
+            this.unloading = true;
+            console.log(this.itemNganhByTruong);
+          });
+      }
     },
     FilterKhuVuc(maKhuVuc) {
       this.dsTruong = [];
