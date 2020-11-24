@@ -28,23 +28,6 @@
     <v-data-table :items="dataImport" :headers="headers" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="headline"
-                >Bạn Có Muốn Xóa Trường Này Không?</v-card-title
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="closeDelete"
-                  >Cancel</v-btn
-                >
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                  >OK</v-btn
-                >
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
           <v-dialog v-model="dialog" max-width="800px">
             <v-card>
               <v-card-title>
@@ -71,7 +54,7 @@
                         v-model="editedItem.manhomnganh"
                         label="Mã nhóm ngành"
                       ></v-text-field>
-                    </v-col>                 
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -103,22 +86,6 @@
         </v-icon>
       </template>
     </v-data-table>
-    <!-- <v-dialog v-model="dialogShowInsert" max-width="700px"> -->
-      <!-- <template v-slot:activator="{ on, attrs }">
-        <v-btn
-          v-bind="attrs"
-          v-on="on"
-          color="primary"
-          fab
-          rounded
-          class="mt-3"
-          :disabled="dataImport.length === 0"
-          @click="InsertTruong"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </template> -->
-    <!-- </v-dialog> -->
     <div class="text-center mt-4">
       <v-btn
         :loading="loading"
@@ -152,12 +119,12 @@ export default {
       editedItem: {
         manganh: "",
         tennganh: "",
-        manhomnganh: "",
+        manhomnganh: ""
       },
       defaultItem: {
         manganh: "",
         tennganh: "",
-        manhomnganh: "",
+        manhomnganh: ""
       },
       headers: [
         {
@@ -171,6 +138,10 @@ export default {
         {
           text: "Mã Nhóm Ngành",
           value: "manhomnganh"
+        },
+        {
+          text: "Khối",
+          value: "khoi"
         },
         { text: "Actions", value: "actions", sortable: false }
       ]
@@ -214,7 +185,54 @@ export default {
     // },
 
     UploadFile() {
-      console.log(this.dataImport);
+      this.dataImport.map(item => {
+        if (typeof item.khoi === "undefined") {
+          // console.log(item.khoi);
+          item.khoi = [];
+        } else {
+          item.khoi = item.khoi
+            .replace("[", "")
+            .replace("]", "")
+            .split(",");
+        }
+        item.manganh = "" + item.manganh + "";
+      });
+      // console.log(this.dataImport)
+      const batch = this.$fire.firestore.batch();
+      swal({
+        title: "Bạn có chắc chắc muốn import dữ liệu này không?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+      }).then(willImport => {
+        if (willImport) {
+          this.$fire.firestore
+            .collection("nganh")
+            .get()
+            .then(querySnapshot => {
+              // Immutable copy
+              querySnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+              });
+              this.dataImport.forEach(data => {
+                const collection = this.$fire.firestore
+                  .collection("nganh")
+                  .doc();
+                batch.set(collection, data);
+              });
+              batch
+                .commit()
+                .then(() => {
+                  swal("Thêm dữ liệu Ngành thành công!", "", "success");
+                })
+                .catch(console.log);
+            });
+        } else {
+          swal("Hủy Import!");
+          this.dataImport = [];
+          this.fileExcel = null;
+        }
+      });
     },
 
     editItem(item) {
@@ -227,21 +245,23 @@ export default {
     deleteItem(item) {
       this.editedIndex = this.dataImport.indexOf(item);
       this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.dataImport.splice(this.editedIndex, 1);
-      console.log(this.dataImport);
-      this.closeDelete();
-    },
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+      swal({
+        title: "Bạn có chắc xóa trường này không?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.dataImport.splice(this.editedIndex, 1);
+          swal("Xóa thành công", {
+            icon: "success"
+          });
+        } else {
+          swal("Xóa không thành công!");
+        }
       });
     },
+
     close() {
       this.dialog = false;
       this.$nextTick(() => {

@@ -227,11 +227,6 @@ export default {
       ]
     };
   },
-  watch: {
-    dialogDelete(val) {
-      val || this.closeDelete();
-    }
-  },
   methods: {
     handleLoadExcel() {
       this.loader = "loading";
@@ -265,29 +260,48 @@ export default {
     // },
 
     UploadFile() {
-      this.dataImport.map((item) => {
-        item.manganh = item.manganh.replace("[","").replace("]","").split(",")
-      }) 
+      this.dataImport.map(item => {
+        item.manganh = item.manganh
+          .replace("[", "")
+          .replace("]", "")
+          .split(",");
+      });
+      // console.log(this.dataImport)
       const batch = this.$fire.firestore.batch();
-      this.$fire.firestore
-        .collection("truong")
-        .get()
-        .then(querySnapshot => {
-          // Immutable copy
-          querySnapshot.forEach(doc => {
-            batch.delete(doc.ref);
-          });
-          this.dataImport.forEach(data => {
-            const collection = this.$fire.firestore.collection("truong").doc();
-            batch.set(collection, data);
-          });
-          batch
-            .commit()
-            .then(() => {
-              swal("Thêm dữ liệu TRƯỜNG thành công!", "", "success");
-            })
-            .catch(console.log);
-        });
+      swal({
+        title: "Bạn có chắc chắc muốn import dữ liệu này không?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+      }).then(willImport => {
+        if (willImport) {
+          this.$fire.firestore
+            .collection("truong")
+            .get()
+            .then(querySnapshot => {
+              // Immutable copy
+              querySnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+              });
+              this.dataImport.forEach(data => {
+                const collection = this.$fire.firestore
+                  .collection("truong")
+                  .doc();
+                batch.set(collection, data);
+              });
+              batch
+                .commit()
+                .then(() => {
+                  swal("Thêm dữ liệu TRƯỜNG thành công!", "", "success");
+                })
+                .catch(console.log);
+            });
+        } else {
+          swal("Hủy Import!");
+          this.dataImport = [];
+          this.fileExcel = null;
+        }
+      });
     },
 
     editItem(item) {
