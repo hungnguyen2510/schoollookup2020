@@ -9,12 +9,37 @@
       </v-col>
     </v-row>
     <v-row justify="center" align="center">
-      <v-col cols="12">
+      <v-col cols="12" justify="center" align="center">
+        <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
         <v-text-field
+          v-model="searchText"
           label="Nhập mã ngành hoặc tên ngành mà bạn muốn tìm kiếm"
           @input="timKiemNganh"
           outlined
         ></v-text-field>
+        <v-card
+          class="mx-auto"
+          max-width="500"
+          tile
+          v-if="dsNganh.length !== 0"
+        >
+          <v-list flat>
+            <v-list-item-group v-model="selectedItem" color="primary">
+              <v-list-item v-for="(item, i) in dsNganh" :key="i">
+                <v-list-item-icon>
+                  <v-icon v-text="item.manganh"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title
+                    v-text="item.tennganh"
+                    @click="showItem(item)"
+                  ></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card>
+        <!-- </v-form> -->
       </v-col>
     </v-row>
     <CardHome />
@@ -28,6 +53,9 @@ import CardHome from "~/components/CardHome.vue";
 
 export default {
   data: () => ({
+    valid: true,
+    selectedItem: null,
+    searchText: "",
     search: "",
     dsNganh: [],
     isLoading: false,
@@ -58,30 +86,43 @@ export default {
     VuetifyLogo
   },
   methods: {
+    showItem(item) {
+      this.$router.push({
+        path: "/search",
+        query: { manganh: item.manganh, tennganh: item.tennganh }
+      });
+    },
     async timKiemNganh(term) {
-      this.dsTruong = [];
-      this.isLoading = true;
-      const queryByTen = this.$fire.firestore
-        .collection("nganh")
-        .orderBy("tennganh")
-        .startAt(term)
-        .endAt(term + "~");
-      const queryByMa = this.$fire.firestore
-        .collection("nganh")
-        .orderBy("manganh")
-        .startAt(term)
-        .endAt(term + "~");
-      const results = await Promise.all([queryByTen.get(), queryByMa.get()]);
-      // console.log(results)
-      results[0].forEach(doc => {
-        this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
-        console.log(doc.data())
-      });
-      results[1].forEach(doc => {
-        this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
-        // console.log(doc.data())
-      });
-      console.log(this.dsTruong);
+      if (term != "") {
+        const match =
+          term.charAt(0).toUpperCase() + term.slice(1).toLowerCase();
+        this.dsNganh = [];
+        this.isLoading = true;
+        const queryByTen = this.$fire.firestore
+          .collection("nganh")
+          .orderBy("tennganh")
+          .startAt(match)
+          .endAt(match);
+        const queryByMa = this.$fire.firestore
+          .collection("nganh")
+          .orderBy("manganh")
+          .startAt(match)
+          .endAt(match);
+        const results = await Promise.all([queryByTen.get(), queryByMa.get()]);
+        // console.log(results)
+        results[0].forEach(doc => {
+          this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
+          // console.log(doc.data());
+        });
+        results[1].forEach(doc => {
+          this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
+          // console.log(doc.data())
+        });
+        console.log(this.dsNganh);
+      } else {
+        // this.selectedItem = null;
+        this.dsNganh = [];
+      }
     }
   }
 };
