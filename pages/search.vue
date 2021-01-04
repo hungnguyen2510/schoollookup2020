@@ -29,7 +29,6 @@ export default {
   },
   methods: {
     async timKiemNganh(result) {
-      //   console.log([result.manganh]);
       this.$fire.firestore
         .collection("truong")
         .where("manganh", "array-contains", result.manganh)
@@ -38,7 +37,6 @@ export default {
           // Immutable copy
           querySnapshot.forEach(doc => {
             this.dsTruong = [...this.dsTruong, { id: doc.id, ...doc.data() }];
-            // console.log(doc.data());
           });
           this.unloading = true;
           console.log(this.dsTruong);

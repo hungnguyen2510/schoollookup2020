@@ -83,7 +83,7 @@ export default {
         title: "DS Trường",
         to: "/ds-truong"
       },
-      { icon: "mdi-apps", title: "DS Ngành", to: "/ds-nganh" }
+      { icon: "mdi-apps", title: "DS Nhóm Ngành", to: "/ds-nhomnganh" }
     ],
     admins: [
       {

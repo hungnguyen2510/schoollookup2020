@@ -13,6 +13,9 @@
         <v-tab v-model="tab" @click="changeTab(3)">
           Import Điểm
         </v-tab>
+        <v-tab v-model="tab" @click="changeTab(4)">
+          Import Nhóm Ngành
+        </v-tab>
       </v-tabs>
     </v-toolbar>
     <v-spacer></v-spacer>
@@ -26,6 +29,9 @@
     <div v-else-if="tab == 3">
       <ImportDiem />
     </div>
+    <div v-else-if="tab == 4">
+      <ImportNhomnganh />
+    </div>
   </v-container>
 </template>
 
@@ -33,6 +39,7 @@
 import ImportTruong from "../components/importTruong";
 import ImportNganh from "../components/importNganh";
 import ImportDiem from "../components/importDiem";
+import ImportNhomnganh from "../components/importNhomnganh";
 export default {
   data: () => ({
     tab: 1
@@ -40,7 +47,8 @@ export default {
   components: {
     ImportTruong,
     ImportNganh,
-    ImportDiem
+    ImportDiem,
+    ImportNhomnganh
   },
   created() {
     this.checkSignIn();
