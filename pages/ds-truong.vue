@@ -84,10 +84,32 @@
               :items="itemNganhByTruong"
               :headers="headerNganh"
               item-key="manganh"
-            ></v-data-table>
+            >
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-icon
+                  class="mr-2"
+                  @click="inforDiemChuan(item)"
+                  color="green"
+                >
+                  mdi-information
+                </v-icon>
+              </template>
+            </v-data-table>
           </v-card-text>
         </div>
-        <!-- </v-expand-transition> -->
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogDiemChuan" width="500">
+      <v-card>
+        <v-card-text>
+          <v-data-table
+            :items="itemDiemChuanByKhoi"
+            :headers="headerDiemChuan"
+            item-key="makhoi"
+            :hide-default-footer="true"
+          >
+          </v-data-table>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -100,9 +122,11 @@ export default {
     show: false,
     title: "",
     dialog: false,
+    dialogDiemChuan: false,
     selectedKhuVuc: null,
     itemTruong: [],
     itemNganhByTruong: [],
+    itemDiemChuanByKhoi: [],
     dsTruong: [],
     dsKhuVuc: [],
     unloading: false,
@@ -135,6 +159,25 @@ export default {
       {
         text: "Tên Ngành",
         value: "tennganh"
+      },
+      {
+        text: "Khối",
+        value: "khoi"
+      },
+      {
+        text: "Thông Tin Thêm",
+        value: "actions"
+      }
+    ],
+    headerDiemChuan: [
+      {
+        text: "Mã Khối",
+        align: "start",
+        value: "makhoi"
+      },
+      {
+        text: "Điểm Chuẩn",
+        value: "diemchuan"
       }
     ]
   }),
@@ -189,7 +232,7 @@ export default {
         });
       let arrtmp = [];
       const arr1 = [];
-      arrtmp = manganh
+      arrtmp = manganh;
       while (arrtmp.length) {
         const tmp = arrtmp.splice(0, 10);
         this.$fire.firestore
@@ -205,9 +248,25 @@ export default {
               ];
             });
             this.unloading = true;
-            console.log(this.itemNganhByTruong);
+            // console.log("this.itemNganhByTruong", this.itemNganhByTruong);
           });
       }
+    },
+    inforDiemChuan({ manganh }) {
+      // console.log(this.itemTruong[0].matruong);
+      this.itemDiemChuanByKhoi  = []
+      this.dialogDiemChuan = true;
+      this.$fire.firestore
+        .collection("diemchuan").where("matruong", "==", this.itemTruong[0].matruong).where("manganh", "==", manganh)
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          querySnapshot.forEach(doc => {
+            this.itemDiemChuanByKhoi = [...this.itemDiemChuanByKhoi, { id: doc.id, ...doc.data() }];
+            // console.log(doc.data());
+          });
+          // console.log(this.itemDiemChuanByKhoi);
+        });
     },
     FilterKhuVuc(maKhuVuc) {
       this.dsTruong = [];

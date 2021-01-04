@@ -7,11 +7,11 @@
       v-bind:key="index"
     >
       <v-img class="align-end" height="200px" width="500px">
-        <v-card-title>{{item.tennhomnganh}}</v-card-title>
+        <v-card-title>{{ item.tennhomnganh }}</v-card-title>
       </v-img>
 
       <v-card-subtitle>
-        {{item.manhomnganh}}
+        {{ item.manhomnganh }}
       </v-card-subtitle>
 
       <v-card-text class="text--primary">
@@ -41,7 +41,8 @@ export default {
   methods: {
     GetNhomNganh() {
       return this.$fire.firestore
-        .collection("nhomnganh").limit(4)
+        .collection("nhomnganh")
+        .limit(4)
         .get()
         .then(querySnapshot => {
           // Immutable copy
