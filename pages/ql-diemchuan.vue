@@ -299,7 +299,7 @@ export default {
     GetDSKhoi() {
       this.dsKhoi = [];
       this.unloading = true;
-      // console.log(this.selectedNganhHoc);
+      console.log(this.selectedNganhHoc, this.selectedTruong);
       this.$fire.firestore
         .collection("nganh")
         .where("manganh", "==", this.selectedNganhHoc)
@@ -309,14 +309,16 @@ export default {
           querySnapshot.forEach(doc => {
             this.tempKhoi = doc.data()["khoi"];
             this.$fire.firestore
-              .collection("khoi")
+              .collection("khoi1")
               .where("makhoi", "in", doc.data()["khoi"])
               .get()
               .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
                   this.dsKhoi = [...this.dsKhoi, { id: doc.id, ...doc.data() }];
                 });
+                console.log(this.dsKhoi);
               });
+            console.log(this.tempKhoi);
             this.$fire.firestore
               .collection("diemchuan")
               .where("makhoi", "in", this.tempKhoi)
@@ -339,7 +341,7 @@ export default {
                     return khoi;
                   });
                 });
-                // console.log(this.dsKhoi);
+                console.log(this.dsKhoi);
               });
             this.unloading = false;
           });

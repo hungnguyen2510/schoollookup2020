@@ -15,6 +15,13 @@
 
           <v-list-item-title class="white--text">Home</v-list-item-title>
         </v-list-item>
+        <v-list-item to="/ql-diemchuan">
+          <v-list-item-icon>
+            <v-icon class="white--text">mdi-search-web</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-title class="white--text">Tra Cứu Điểm Chuẩn</v-list-item-title>
+        </v-list-item>
 
         <v-list-group no-action>
           <v-icon slot="prependIcon" color="white">mdi-account-circle</v-icon>
@@ -86,11 +93,6 @@ export default {
       { icon: "mdi-apps", title: "DS Nhóm Ngành", to: "/ds-nhomnganh" }
     ],
     admins: [
-      {
-        icon: "mdi-apps",
-        title: "Điểm Chuẩn",
-        to: "/ql-diemchuan"
-      },
       { icon: "mdi-apps", title: "Import", to: "/import" }
     ]
   }),
