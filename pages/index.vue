@@ -118,7 +118,7 @@ export default {
           this.dsNganh = [...this.dsNganh, { id: doc.id, ...doc.data() }];
           // console.log(doc.data())
         });
-        console.log(this.dsNganh);
+        // console.log(this.dsNganh);
       } else {
         // this.selectedItem = null;
         this.dsNganh = [];
