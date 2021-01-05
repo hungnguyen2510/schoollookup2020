@@ -3,8 +3,12 @@
     <v-row justify="center" align="center">
       <v-col cols="12" sm="8" md="6">
         <div class="text-center">
-          <logo />
-          <vuetify-logo />
+          <TagsBall
+            v-on:changeTxtSearch="handleBall"
+            :tags="itemTags"
+            :width="250"
+            :height="250"
+          />
         </div>
       </v-col>
     </v-row>
@@ -50,11 +54,13 @@
 import Logo from "~/components/Logo.vue";
 import VuetifyLogo from "~/components/VuetifyLogo.vue";
 import CardHome from "~/components/CardHome.vue";
+import TagsBall from "~/components/TagsBall.vue";
 
 export default {
   data: () => ({
     valid: true,
     selectedItem: null,
+    itemTags: [1, 2, 3],
     searchText: "",
     search: "",
     dsNganh: [],
@@ -83,7 +89,11 @@ export default {
   components: {
     Logo,
     CardHome,
-    VuetifyLogo
+    VuetifyLogo,
+    TagsBall
+  },
+  created() {
+    this.GetNganh()
   },
   methods: {
     showItem(item) {
@@ -91,6 +101,25 @@ export default {
         path: "/search",
         query: { manganh: item.manganh, tennganh: item.tennganh }
       });
+    },
+    handleBall(data) {
+      // console.log(data)
+      // this.searchText = data.tennganh
+      this.showItem(data)
+    },
+    GetNganh() {
+      this.itemTags = [];
+      this.$fire.firestore
+        .collection("nganh")
+        .limit(4)
+        .get()
+        .then(querySnapshot => {
+          // Immutable copy
+          querySnapshot.forEach(doc => {
+            this.itemTags = [...this.itemTags, doc.data()];
+          });
+          // console.log(this.itemTags);
+        });
     },
     async timKiemNganh(term) {
       if (term != "") {

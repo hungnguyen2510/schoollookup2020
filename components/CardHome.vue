@@ -10,11 +10,15 @@
         <v-card-title>{{ item.tennhomnganh }}</v-card-title>
       </v-img>
 
-      <!-- <v-card-text class="text--primary">
-        <div>Whitehaven Beach</div>
-
-        <div>Whitsunday Island, Whitsunday Islands</div>
-      </v-card-text> -->
+      <v-rating
+        v-model="item.rating"
+        color="yellow darken-3"
+        background-color="grey darken-1"
+        empty-icon="$ratingFull"
+        half-increments
+        hover
+        large
+      ></v-rating>
 
       <v-card-actions>
         <v-btn color="orange" text @click="handleNhomNganh(item)">
@@ -27,7 +31,7 @@
 <script>
 export default {
   data: () => ({
-    itemNhomNganh: []
+    itemNhomNganh: [],
   }),
   async created() {
     await this.GetNhomNganh();
